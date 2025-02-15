@@ -4,11 +4,12 @@ import (
 	"container/heap"
 	"context"
 	"errors"
-	"github.com/traefik/traefik/v3/pkg/healthcheck"
 	"hash/fnv"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/traefik/traefik/v3/pkg/healthcheck"
 
 	"github.com/rs/zerolog/log"
 	"github.com/traefik/traefik/v3/pkg/config/dynamic"
@@ -306,19 +307,16 @@ func (b *Balancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	customWriter := &CustomResponseWriter{ResponseWriter: w, StatusCode: http.StatusOK}
-	if server.wantsPassiveHealthCheck {
-		if !server.passiveHealthChecker.AllowRequest() {
-			server, err = b.nextServerExcluding(server.name)
-			if err != nil {
-				if errors.Is(err, errNoAvailableServer) {
-					http.Error(w, errNoAvailableServer.Error(), http.StatusServiceUnavailable)
-				} else {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-				}
-				return
+	if server.wantsPassiveHealthCheck && !server.passiveHealthChecker.AllowRequest() {
+		server, err = b.nextServerExcluding(server.name)
+		if err != nil {
+			if errors.Is(err, errNoAvailableServer) {
+				http.Error(w, errNoAvailableServer.Error(), http.StatusServiceUnavailable)
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+			return
 		}
-
 	}
 
 	server.ServeHTTP(customWriter, req)

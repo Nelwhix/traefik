@@ -2,14 +2,15 @@ package wrr
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
-	ptypes "github.com/traefik/paerser/types"
-	"github.com/traefik/traefik/v3/pkg/config/dynamic"
-	"github.com/traefik/traefik/v3/pkg/healthcheck"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	ptypes "github.com/traefik/paerser/types"
+	"github.com/traefik/traefik/v3/pkg/config/dynamic"
+	"github.com/traefik/traefik/v3/pkg/healthcheck"
 )
 
 func pointer[T any](v T) *T { return &v }
@@ -396,7 +397,7 @@ func TestSticky_Fenced(t *testing.T) {
 
 func TestPassiveHealthCheck(t *testing.T) {
 	balancer := New(nil, false)
-	healthChecker := healthcheck.NewPassiveHealthChecker(3, ptypes.Duration(time.Second*2))
+	healthChecker := healthcheck.NewPassiveHealthChecker(3, ptypes.Duration(2*time.Second))
 
 	balancer.Add("first", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError) // Simulate unhealthy backend
@@ -420,7 +421,7 @@ func TestPassiveHealthCheck(t *testing.T) {
 
 	t.Run("Test health check recovery", func(t *testing.T) {
 		// Wait for the recovery window (2s + 1s buffer)
-		time.Sleep(time.Second * 3)
+		time.Sleep(3 * time.Second)
 
 		// After recovery, backend should allow requests again
 		assert.True(t, healthChecker.AllowRequest(), "AllowRequest should recover after timeout")

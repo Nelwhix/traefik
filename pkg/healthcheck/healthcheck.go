@@ -57,13 +57,6 @@ type ServiceHealthChecker struct {
 	serviceName string
 }
 
-type PassiveHealthChecker struct {
-	mu          sync.Mutex
-	Failures    []time.Time
-	maxFail     int
-	failTimeout ptypes.Duration
-}
-
 func NewServiceHealthChecker(ctx context.Context, metrics metricsHealthCheck, config *dynamic.ServerHealthCheck, service StatusSetter, info *runtime.ServiceInfo, transport http.RoundTripper, targets map[string]*url.URL, serviceName string) *ServiceHealthChecker {
 	logger := log.Ctx(ctx)
 
@@ -273,9 +266,16 @@ func (shc *ServiceHealthChecker) checkHealthGRPC(ctx context.Context, serverURL 
 	return nil
 }
 
+type PassiveHealthChecker struct {
+	mu          sync.Mutex
+	failures    []time.Time
+	maxFail     int
+	failTimeout ptypes.Duration
+}
+
 func NewPassiveHealthChecker(maxFail int, failTimeout ptypes.Duration) *PassiveHealthChecker {
 	return &PassiveHealthChecker{
-		Failures:    []time.Time{},
+		failures:    []time.Time{},
 		maxFail:     maxFail,
 		failTimeout: failTimeout,
 	}
@@ -285,25 +285,25 @@ func (p *PassiveHealthChecker) AllowRequest() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Clean up old Failures outside the sliding window
+	// Clean up old failures outside the sliding window
 	now := time.Now()
 	threshold := now.Add(time.Duration(-p.failTimeout))
-	var filteredFailures []time.Time
 
-	for _, t := range p.Failures {
+	var filteredFailures []time.Time
+	for _, t := range p.failures {
 		if t.After(threshold) {
 			filteredFailures = append(filteredFailures, t)
 		}
 	}
-	p.Failures = filteredFailures
+	p.failures = filteredFailures
 
-	// Check if Failures exceed maxFail
-	return len(p.Failures) < p.maxFail
+	// Check if failures exceed maxFail
+	return len(p.failures) < p.maxFail
 }
 
 func (p *PassiveHealthChecker) RecordFailure() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	p.Failures = append(p.Failures, time.Now())
+	p.failures = append(p.failures, time.Now())
 }
