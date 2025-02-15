@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ptypes "github.com/traefik/paerser/types"
 	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
 	"time"
+
+	ptypes "github.com/traefik/paerser/types"
 
 	gokitmetrics "github.com/go-kit/kit/metrics"
 	"github.com/rs/zerolog/log"
