@@ -1,0 +1,37 @@
+name: Test i686 Compatibility
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-i686:
+    runs-on: ubuntu-latest
+    container: i386/ubuntu  # Use a 32-bit Ubuntu container
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y curl gcc
+
+      - name: Install Go
+        run: |
+          curl -OL https://golang.org/dl/go1.21.5.linux-386.tar.gz
+          tar -C /usr/local -xzf go1.21.5.linux-386.tar.gz
+          export PATH=$PATH:/usr/local/go/bin
+          go version
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          export PATH=$PATH:/usr/local/go/bin
+          GOARCH=386 GOOS=linux go build -o myprogram_i686
+
+      - name: Run Tests
+        run: |
+          make test
