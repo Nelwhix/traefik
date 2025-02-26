@@ -8,25 +8,20 @@ on:
 jobs:
   test-i686:
     runs-on: ubuntu-latest
-    container: i386/node  # Use a 32-bit Node.js image
-
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y curl gcc make
-
-      - name: Install Go
-        run: |
-          curl -OL https://golang.org/dl/go1.21.5.linux-386.tar.gz
-          tar -C /usr/local -xzf go1.21.5.linux-386.tar.gz
-          echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-          source ~/.bashrc
-          /usr/local/go/bin/go version  # Verify installation
-
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Alpine Linux Environment
+        uses: jirutka/setup-alpine@v1
+        with:
+          arch: i686  # Set architecture to i686
+          branch: edge # Use the latest Alpine branch (optional)
+          packages: > # Install required packages
+            docker
+            go
+            nodejs
+                npm
+
       - name: Run Tests
-        run: |
-          make test
+        run: make test
