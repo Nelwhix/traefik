@@ -8,31 +8,24 @@ on:
 jobs:
   test-i686:
     runs-on: ubuntu-latest
-    container: i386/ubuntu  # Use a 32-bit Ubuntu container
+    container: i386/node  # Use a 32-bit Node.js image
 
     steps:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y curl gcc
-          curl -sL https://deb.nodesource.com/setup_20.x | bash -
-          apt-get install -y nodejs
-          node -v  # Verify installation
+          apt-get install -y curl gcc make
 
       - name: Install Go
         run: |
           curl -OL https://golang.org/dl/go1.21.5.linux-386.tar.gz
           tar -C /usr/local -xzf go1.21.5.linux-386.tar.gz
-          export PATH=$PATH:/usr/local/go/bin
-          go version
+          echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+          source ~/.bashrc
+          /usr/local/go/bin/go version  # Verify installation
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Build
-        run: |
-          export PATH=$PATH:/usr/local/go/bin
-          GOARCH=386 GOOS=linux go build -o myprogram_i686
 
       - name: Run Tests
         run: |
