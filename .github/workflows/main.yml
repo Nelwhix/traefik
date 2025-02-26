@@ -2,6 +2,8 @@ name: Test i686 Compatibility
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ master ]
 
 jobs:
   test-i686:
