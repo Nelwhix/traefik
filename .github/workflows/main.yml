@@ -8,20 +8,21 @@ on:
 jobs:
   test-i686:
     runs-on: ubuntu-latest
+    container:
+      image: i386/alpine:latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Alpine Linux Environment
-        uses: jirutka/setup-alpine@v1
-        with:
-          arch: i686  # Set architecture to i686
-          branch: edge # Use the latest Alpine branch (optional)
-          packages: > # Install required packages
-            docker
-            go
-            nodejs
-                npm
+      - name: Install Go and dependencies
+        run: |
+          apk update
+          apk add go git
 
-      - name: Run Tests
-        run: make test
+      - name: Run Go tests
+        env:
+          GOARCH: 386  # Ensure we're targeting 32-bit if needed
+        run: |
+          go version
+          make test
