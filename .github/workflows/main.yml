@@ -9,7 +9,7 @@ jobs:
   test-i686:
     runs-on: ubuntu-latest
     container:
-      image: nelwhix/traefik-1686:latest
+      image: nelwhix/traefik-i686:latest
 
     steps:
       - name: Checkout repository
