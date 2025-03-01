@@ -11,10 +11,9 @@ import (
 	"sync"
 	"time"
 
-	ptypes "github.com/traefik/paerser/types"
-
 	gokitmetrics "github.com/go-kit/kit/metrics"
 	"github.com/rs/zerolog/log"
+	ptypes "github.com/traefik/paerser/types"
 	"github.com/traefik/traefik/v3/pkg/config/dynamic"
 	"github.com/traefik/traefik/v3/pkg/config/runtime"
 	"google.golang.org/grpc"
